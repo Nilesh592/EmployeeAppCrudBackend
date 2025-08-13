@@ -128,6 +128,7 @@ namespace Employee_Crud.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateEmployee(EmployeeModel obj)
         {
+            var response = new ServiceResponseDto<EmployeeModel>();
             try
             {
                 SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
@@ -145,13 +146,19 @@ namespace Employee_Crud.Controllers
                 cmd.Parameters.AddWithValue("@UploadPicture", obj.UploadPicture);
                 cmd.Parameters.AddWithValue("@PayrollType", obj.PayrollType);
                 da = new SqlDataAdapter(cmd);
-                da.Fill(dt);
+                da.Update(dt);
 
-                return Ok();
+                response.Success = true;
+                response.Data = obj;
+                response.Message = "Employee details updated successfully.";
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                throw ex;
+                response.Success = false;
+                response.Message = $"An error occurred: {ex.Message}";
+                return StatusCode(500, response);
             }
         }
 
